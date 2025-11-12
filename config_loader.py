@@ -7,7 +7,7 @@ from typing import Dict, Type, TypeVar, Optional, List, Generic, Literal, Tuple,
 from pydantic import BaseModel
 from pydantic.fields import FieldInfo  # noqa
 
-from omnibox_wizard.common.logger import get_logger
+from common.logger import get_logger
 
 try:
     import yaml
