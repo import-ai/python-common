@@ -24,7 +24,7 @@ def app_factory(
 ) -> FastAPI:
     @asynccontextmanager
     async def lifespan(_: FastAPI):
-        for init_func in init_funcs:
+        for init_func in (init_funcs or []):
             await init_func()
         yield
 
