@@ -13,18 +13,23 @@ from common.exception import CommonException
 
 async def exception_handler(_: Request, e: Exception) -> Response:
     if isinstance(e, CommonException):
-        return JSONResponse(status_code=e.code, content={"code": e.code, "error": e.error})
-    return JSONResponse(status_code=500, content={"code": 500, "error": CommonException.parse_exception(e)})
+        return JSONResponse(
+            status_code=e.code, content={"code": e.code, "error": e.error}
+        )
+    return JSONResponse(
+        status_code=500,
+        content={"code": 500, "error": CommonException.parse_exception(e)},
+    )
 
 
 def app_factory(
-        init_funcs: list[Callable[..., Awaitable]] | None = None,
-        version: str | None = None,
-        patch_funcs: list[Callable[[FastAPI], None]] | None = None,
+    init_funcs: list[Callable[..., Awaitable]] | None = None,
+    version: str | None = None,
+    patch_funcs: list[Callable[[FastAPI], None]] | None = None,
 ) -> FastAPI:
     @asynccontextmanager
     async def lifespan(_: FastAPI):
-        for init_func in (init_funcs or []):
+        for init_func in init_funcs or []:
             await init_func()
         yield
 
@@ -35,7 +40,7 @@ def app_factory(
 
     app = FastAPI(lifespan=lifespan, version=version)
 
-    for patch_func in (patch_funcs or []):
+    for patch_func in patch_funcs or []:
         patch_func(app)
 
     app.add_middleware(
@@ -43,7 +48,7 @@ def app_factory(
         allow_origins=["*"],
         allow_credentials=True,
         allow_methods=["*"],
-        allow_headers=["*"]
+        allow_headers=["*"],
     )
 
     app.add_exception_handler(Exception, exception_handler)

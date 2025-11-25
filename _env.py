@@ -9,7 +9,6 @@ class EnvValue:
 
 
 class Env:
-
     @property
     def env(self) -> str:
         return os.getenv("ENV", EnvValue.LOCAL).lower()
@@ -28,10 +27,10 @@ class Env:
 
     @staticmethod
     def is_k8s() -> bool:
-        if os.getenv('KUBERNETES_SERVICE_HOST'):
+        if os.getenv("KUBERNETES_SERVICE_HOST"):
             return True
 
-        if os.path.isfile('/var/run/secrets/kubernetes.io/serviceaccount/token'):
+        if os.path.isfile("/var/run/secrets/kubernetes.io/serviceaccount/token"):
             return True
 
         return False

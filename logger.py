@@ -10,7 +10,7 @@ from common import env
 class DatetimeEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, datetime):
-            return obj.strftime('%Y-%m-%d %H:%M:%S.%f')
+            return obj.strftime("%Y-%m-%d %H:%M:%S.%f")
         return super().default(obj)
 
 
@@ -26,20 +26,22 @@ class CustomFormatter(logging.Formatter):
         else:
             message = record.getMessage()
         log = {
-            'name': record.name,
-            'level': record.levelname,
-            'source': source,
-            'create_time': datetime.fromtimestamp(record.created),
-            'message': message
+            "name": record.name,
+            "level": record.levelname,
+            "source": source,
+            "create_time": datetime.fromtimestamp(record.created),
+            "message": message,
         }
         if record.exc_info:
             log["traceback"] = self.formatException(record.exc_info)
-        str_log = json.dumps(log, ensure_ascii=False, separators=(',', ':'), cls=DatetimeEncoder)
+        str_log = json.dumps(
+            log, ensure_ascii=False, separators=(",", ":"), cls=DatetimeEncoder
+        )
         if (length := len(str_log)) > 65535:
             log = {
                 "error": "logging entity too long",
                 "length": length,
-                "traceback": ''.join(traceback.format_list(traceback.extract_stack()))
+                "traceback": "".join(traceback.format_list(traceback.extract_stack())),
             }
             str_log = json.dumps(log)
         if env.is_local() and "traceback" in log:  # 方便本地 DEBUG

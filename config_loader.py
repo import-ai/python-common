@@ -2,7 +2,19 @@ import argparse
 import inspect
 import os
 from types import UnionType
-from typing import Dict, Type, TypeVar, Optional, List, Generic, Literal, Tuple, get_origin, get_args, Union
+from typing import (
+    Dict,
+    Type,
+    TypeVar,
+    Optional,
+    List,
+    Generic,
+    Literal,
+    Tuple,
+    get_origin,
+    get_args,
+    Union,
+)
 
 from pydantic import BaseModel
 from pydantic.fields import FieldInfo  # noqa
@@ -27,7 +39,7 @@ def load_from_config_file(config_path: Optional[str] = None) -> Dict[str, str]:
 
 
 def dict_prefix_filter(prefix: str, data: dict) -> dict:
-    return {k[len(prefix):]: v for k, v in data.items() if k.startswith(prefix)}
+    return {k[len(prefix) :]: v for k, v in data.items() if k.startswith(prefix)}
 
 
 def parse_value(value: str, cls: Type):
@@ -65,7 +77,9 @@ def dfs(config_model: Type[_Config], env_dict: Dict[str, str]) -> dict:
             continue
         if filtered_env_dict:
             assert issubclass(field_info.annotation, BaseModel)
-            result[field_name] = dfs(field_info.annotation, dict_prefix_filter("_", filtered_env_dict))
+            result[field_name] = dfs(
+                field_info.annotation, dict_prefix_filter("_", filtered_env_dict)
+            )
     return result
 
 
@@ -93,11 +107,11 @@ def merge_dicts(old: dict, new: dict, *args: List[dict]):
 
 class Loader(Generic[_Config]):
     def __init__(
-            self,
-            config_model: Type[_Config],
-            env_prefix: str | None = None,
-            config_path: str | None = None,
-            config_dict: dict | None = None
+        self,
+        config_model: Type[_Config],
+        env_prefix: str | None = None,
+        config_path: str | None = None,
+        config_dict: dict | None = None,
     ):
         self.config_model: Type[_Config] = config_model
         self.env_prefix: str | None = env_prefix
@@ -105,20 +119,26 @@ class Loader(Generic[_Config]):
         self.config_dict: dict | None = config_dict
 
     def fields(
-            self, config_model: Type[_Config] | None = None, prefix: List[str] = None
+        self, config_model: Type[_Config] | None = None, prefix: List[str] = None
     ) -> List[Tuple[List[str], FieldInfo]]:
         fields: List[Tuple[List[str], FieldInfo]] = []
         prefix: List[str] = prefix or []
         for key, field_info in config_model.model_fields.items():  # noqa
-            if inspect.isclass(field_info.annotation) and issubclass(field_info.annotation, BaseModel):
+            if inspect.isclass(field_info.annotation) and issubclass(
+                field_info.annotation, BaseModel
+            ):
                 fields.extend(self.fields(field_info.annotation, prefix + [key]))
             else:
                 fields.append((prefix + [key], field_info))
         return fields
 
     def keys(self, key_type: Literal["arg", "env"]) -> List[str]:
-        assert key_type in ("arg", "env"), f"key_type must be 'arg' or 'env', but got {key_type}"
-        assert key_type == "arg" or self.env_prefix is not None, f"env_prefix must be set when key_type is 'env'"
+        assert key_type in ("arg", "env"), (
+            f"key_type must be 'arg' or 'env', but got {key_type}"
+        )
+        assert key_type == "arg" or self.env_prefix is not None, (
+            "env_prefix must be set when key_type is 'env'"
+        )
         fields: List[Tuple[List[str], FieldInfo]] = self.fields(self.config_model)
         separator = "-" if key_type == "arg" else "_"
         result: List[str] = []
@@ -149,10 +169,10 @@ class Loader(Generic[_Config]):
         return {k: v for k, v in c.items() if v is not None}
 
     def load(
-            self,
-            env_prefix: str | None = None,
-            config_path: str | None = None,
-            config_dict: dict | None = None
+        self,
+        env_prefix: str | None = None,
+        config_path: str | None = None,
+        config_dict: dict | None = None,
     ) -> _Config:
         env_prefix = env_prefix or self.env_prefix
         config_path = config_path or self.config_path
