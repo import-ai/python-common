@@ -23,15 +23,18 @@ async def exception_handler(_: Request, e: Exception) -> Response:
 
 
 def app_factory(
-    init_funcs: list[Callable[..., Awaitable]] | None = None,
+    startup_funcs: list[Callable[..., Awaitable]] | None = None,
+    shutdown_funcs: list[Callable[..., Awaitable]] | None = None,
     version: str | None = None,
     patch_funcs: list[Callable[[FastAPI], None]] | None = None,
 ) -> FastAPI:
     @asynccontextmanager
-    async def lifespan(_: FastAPI):
-        for init_func in init_funcs or []:
-            await init_func()
+    async def lifespan(fastapi: FastAPI):
+        for startup_func in (startup_funcs or []):
+            await startup_func(fastapi)
         yield
+        for shutdown_func in (shutdown_funcs or []):
+            await shutdown_func(fastapi)
 
     project_file: str = "pyproject.toml"
     if version is None and os.path.exists(project_root.path(project_file)):
