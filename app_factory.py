@@ -30,10 +30,10 @@ def app_factory(
 ) -> FastAPI:
     @asynccontextmanager
     async def lifespan(fastapi: FastAPI):
-        for startup_func in (startup_funcs or []):
+        for startup_func in startup_funcs or []:
             await startup_func(fastapi)
         yield
-        for shutdown_func in (shutdown_funcs or []):
+        for shutdown_func in shutdown_funcs or []:
             await shutdown_func(fastapi)
 
     project_file: str = "pyproject.toml"
