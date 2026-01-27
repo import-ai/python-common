@@ -3,9 +3,9 @@ import os
 
 class EnvValue:
     LOCAL: str = "local"
-    DEV: str = "dev"
-    PROD: str = "prod"
     TEST: str = "test"
+    PRE: str = "pre"
+    PROD: str = "prod"
 
 
 class Env:
@@ -16,8 +16,8 @@ class Env:
     def is_prod(self) -> bool:
         return self.env == EnvValue.PROD
 
-    def is_dev(self) -> bool:
-        return self.env == EnvValue.DEV
+    def is_pre(self) -> bool:
+        return self.env == EnvValue.PRE
 
     def is_local(self) -> bool:
         return self.env == EnvValue.LOCAL
