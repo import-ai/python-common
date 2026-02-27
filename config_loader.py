@@ -66,10 +66,16 @@ def parse_annotation(value: str, annotation: Type):
     raise ValueError(f"Cannot parse value '{value}' to any of {classes}")
 
 
-def dfs(config_model: Type[_Config], env_dict: Dict[str, str]) -> dict:
+def dfs(
+    config_model: Type[_Config],
+    env_dict: Dict[str, str],
+    env_field_aliases: Optional[Dict[str, str]] = None,
+) -> dict:
     result = {}
+    aliases = env_field_aliases or {}
     for field_name, field_info in config_model.model_fields.items():  # noqa
-        filtered_env_dict = dict_prefix_filter(field_name.upper(), env_dict)
+        env_key = aliases.get(field_name, field_name).upper()
+        filtered_env_dict = dict_prefix_filter(env_key, env_dict)
         if "" in filtered_env_dict:
             assert len(filtered_env_dict) == 1, f"Conflict name: {field_name}"
             value = filtered_env_dict.pop("")
@@ -78,17 +84,25 @@ def dfs(config_model: Type[_Config], env_dict: Dict[str, str]) -> dict:
         if filtered_env_dict:
             assert issubclass(field_info.annotation, BaseModel)
             result[field_name] = dfs(
-                field_info.annotation, dict_prefix_filter("_", filtered_env_dict)
+                field_info.annotation,
+                dict_prefix_filter("_", filtered_env_dict),
+                env_field_aliases,
             )
     return result
 
 
-def load_from_env(config_model: Type[_Config], env_prefix: str) -> Dict[str, str]:
+def load_from_env(
+    config_model: Type[_Config],
+    env_prefix: str,
+    env_field_aliases: Optional[Dict[str, str]] = None,
+) -> Dict[str, str]:
     env_dict: Dict[str, str] = dict_prefix_filter(env_prefix, dict(os.environ))
     if "" in env_dict:
         env_dict.pop("")
 
-    result = dfs(config_model, dict_prefix_filter("_", env_dict))
+    result = dfs(
+        config_model, dict_prefix_filter("_", env_dict), env_field_aliases
+    )
 
     return result
 
@@ -112,11 +126,13 @@ class Loader(Generic[_Config]):
         env_prefix: str | None = None,
         config_path: str | None = None,
         config_dict: dict | None = None,
+        env_field_aliases: Optional[Dict[str, str]] = None,
     ):
         self.config_model: Type[_Config] = config_model
         self.env_prefix: str | None = env_prefix
         self.config_path: str | None = config_path
         self.config_dict: dict | None = config_dict
+        self.env_field_aliases: Optional[Dict[str, str]] = env_field_aliases
 
     def fields(
         self, config_model: Type[_Config] | None = None, prefix: List[str] = None
@@ -183,7 +199,9 @@ class Loader(Generic[_Config]):
             logger.debug({"yaml_config": yaml_config})
             config_merge = merge_dicts(config_merge, yaml_config)
         if env_prefix is not None:
-            env_config: Dict[str, str] = load_from_env(self.config_model, env_prefix)
+            env_config: Dict[str, str] = load_from_env(
+                self.config_model, env_prefix, self.env_field_aliases
+            )
             logger.debug({"env_config": env_config})
             config_merge = merge_dicts(config_merge, env_config)
         cli_config: Dict[str, str] = self.load_from_cli()
