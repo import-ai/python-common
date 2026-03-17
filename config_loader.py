@@ -100,9 +100,7 @@ def load_from_env(
     if "" in env_dict:
         env_dict.pop("")
 
-    result = dfs(
-        config_model, dict_prefix_filter("_", env_dict), env_field_aliases
-    )
+    result = dfs(config_model, dict_prefix_filter("_", env_dict), env_field_aliases)
 
     return result
 
