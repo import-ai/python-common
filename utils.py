@@ -1,5 +1,5 @@
-import re
 import json as jsonlib
+import re
 from functools import partial
 
 json_dumps = partial(jsonlib.dumps, ensure_ascii=False, separators=(",", ":"))

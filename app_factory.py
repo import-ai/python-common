@@ -1,14 +1,13 @@
 import os.path
 import tomllib
 from contextlib import asynccontextmanager
-from typing import Callable, Awaitable
-
-from fastapi import FastAPI, Request
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, Response
+from typing import Awaitable, Callable
 
 from common import project_root
 from common.exception import CommonException
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse, Response
 
 
 async def exception_handler(_: Request, e: Exception) -> Response:

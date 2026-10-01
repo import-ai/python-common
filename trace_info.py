@@ -2,7 +2,6 @@ from logging import Logger
 from typing import Optional
 
 import shortuuid
-
 from common.logger import get_logger
 
 

@@ -4,22 +4,21 @@ import os
 from types import UnionType
 from typing import (
     Dict,
+    Generic,
+    List,
+    Literal,
+    Optional,
+    Tuple,
     Type,
     TypeVar,
-    Optional,
-    List,
-    Generic,
-    Literal,
-    Tuple,
-    get_origin,
-    get_args,
     Union,
+    get_args,
+    get_origin,
 )
 
+from common.logger import get_logger
 from pydantic import BaseModel
 from pydantic.fields import FieldInfo  # noqa
-
-from common.logger import get_logger
 
 try:
     import yaml

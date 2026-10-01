@@ -1,7 +1,7 @@
 import inspect
 import os
 import pathlib
-from typing import TextIO, Optional
+from typing import Optional, TextIO
 
 
 def _find_project_root(path: pathlib.Path) -> pathlib.Path | None:
