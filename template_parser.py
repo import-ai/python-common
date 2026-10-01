@@ -1,9 +1,8 @@
 import re
 from datetime import datetime
 
-from jinja2 import Environment, FileSystemLoader, Template
-
 from common import project_root
+from jinja2 import Environment, FileSystemLoader, Template
 
 continuous_bl: re.Pattern = re.compile(r"\n\n+")
 template_dir = project_root.path("wizard_common/resources/prompt_templates")
